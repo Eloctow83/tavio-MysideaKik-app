@@ -61,3 +61,11 @@ app.post("/fix", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+echo "# mysidekik1-app" >> README.md
+git init
+git add README.md
+git commit -m "first commit"
+git branch -M main
+git remote add origin https://github.com/Eloctow83/mysidekik1-app.git
+git push -u origin main
