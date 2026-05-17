@@ -3,85 +3,685 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MySideKik</title>
+<title>MySideKik - v0.1 Beta</title>
+
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23007bff' width='100' height='100' rx='50'/><text x='50' y='60' font-size='50' font-weight='bold' fill='white' text-anchor='middle' font-family='system-ui'>M</text></svg>">
 
 <style>
+  * {
+    box-sizing: border-box;
+  }
+
   body {
-    font-family: Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     background: #f0f2f5;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    min-height: 100vh;
+    margin: 0;
+    padding: 8px;
   }
 
   .chat-container {
-    width: 350px;
+    width: 100%;
+    max-width: 420px;
     background: white;
-    border-radius: 10px;
+    border-radius: 12px;
     display: flex;
     flex-direction: column;
-    height: 500px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    height: 100vh;
+    max-height: 680px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    overflow: hidden;
   }
 
   .header {
-    background: #007bff;
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
     color: white;
-    padding: 15px;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-    font-weight: bold;
+    padding: 12px 14px;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .logo {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 16px;
+    flex-shrink: 0;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .header-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .app-name {
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.4px;
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  .app-subtitle {
+    font-size: 10px;
+    opacity: 0.85;
+    font-weight: 400;
+    letter-spacing: 0.3px;
+    margin: 0;
+    line-height: 1.1;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 5px;
+    flex-shrink: 0;
+  }
+
+  .header-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: none;
+    padding: 5px 9px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 10px;
+    font-weight: 500;
+    transition: background 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .header-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  .beta-badge {
+    background: rgba(255, 193, 7, 0.25);
+    color: #ffd700;
+    font-size: 8px;
+    font-weight: 700;
+    padding: 3px 6px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 1px solid rgba(255, 193, 7, 0.4);
+    display: inline-block;
   }
 
   .chat-box {
     flex: 1;
-    padding: 10px;
+    padding: 12px 10px;
     overflow-y: auto;
+    overflow-x: hidden;
     display: flex;
     flex-direction: column;
+    gap: 12px;
+    scroll-behavior: smooth;
+  }
+
+  .chat-box::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  .chat-box::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+
+  .chat-box::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+  }
+
+  .chat-box::-webkit-scrollbar-thumb:hover {
+    background: #888;
+  }
+
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #999;
+    text-align: center;
+    gap: 6px;
+  }
+
+  .empty-state-icon {
+    font-size: 28px;
+    opacity: 0.6;
+  }
+
+  .empty-state-text {
+    font-size: 13px;
+  }
+
+  .message-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .message-group.user-sent {
+    align-items: flex-end;
+  }
+
+  .message-group.bot-reply {
+    align-items: flex-start;
+  }
+
+  .group-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #555;
+    padding: 0 5px;
+    margin-bottom: 0;
+  }
+
+  .group-label.draft {
+    color: #007bff;
+  }
+
+  .group-label.rewrite {
+    color: #666;
+  }
+
+  .group-label.sent {
+    color: #28a745;
+  }
+
+  .message-bubble {
+    display: flex;
+    flex-direction: column;
+    max-width: 85%;
+    word-wrap: break-word;
+    gap: 3px;
   }
 
   .message {
-    max-width: 70%;
-    padding: 10px;
-    margin: 5px 0;
-    border-radius: 15px;
+    padding: 10px 12px;
+    border-radius: 16px;
+    word-wrap: break-word;
+    line-height: 1.35;
+    font-size: 13px;
   }
 
-  .user {
-    align-self: flex-end;
+  .message.user {
     background: #007bff;
     color: white;
+    border-bottom-right-radius: 3px;
   }
 
-  .bot {
-    align-self: flex-start;
+  .message.bot {
     background: #e4e6eb;
+    color: #333;
+    border-bottom-left-radius: 3px;
+  }
+
+  .message.bot.final-message {
+    background: #d0d0d0;
+    font-weight: 500;
+  }
+
+  .message-timestamp {
+    font-size: 11px;
+    color: #666;
+    padding: 0 5px;
+    font-weight: 500;
+  }
+
+  .message-group.user-sent .message-timestamp {
+    text-align: right;
+  }
+
+  .message-group.bot-reply .message-timestamp {
+    text-align: left;
+  }
+
+  .rating-section {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 0 5px;
+    margin-top: 4px;
+    max-width: 85%;
+  }
+
+  .rating-text {
+    font-size: 10px;
+    color: #666;
+    font-weight: 500;
+  }
+
+  .rating-buttons {
+    display: flex;
+    gap: 4px;
+  }
+
+  .rating-btn {
+    flex: 1;
+    background: #f0f0f0;
+    color: #333;
+    border: 1px solid #ddd;
+    padding: 5px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 10px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+
+  .rating-btn:hover {
+    background: #e0e0e0;
+  }
+
+  .rating-btn.rated {
+    background: #28a745;
+    color: white;
+    border-color: #28a745;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    padding: 0 5px;
+    margin-top: 2px;
+    max-width: 85%;
+  }
+
+  .action-btn {
+    background: #f0f0f0;
+    color: #333;
+    border: 1px solid #ddd;
+    padding: 5px 9px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 10px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .action-btn:hover {
+    background: #e0e0e0;
+    border-color: #bbb;
+  }
+
+  .action-btn:active {
+    transform: scale(0.97);
+  }
+
+  .action-btn.warning {
+    color: #dc3545;
+  }
+
+  .action-btn.warning:hover {
+    background: #ffe0e0;
+  }
+
+  .mode-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    padding: 10px 10px;
+    border-top: 1px solid #e0e0e0;
+    background: #fafafa;
+    flex-shrink: 0;
+    justify-content: space-between;
+  }
+
+  .mode-btn {
+    background: #f0f0f0;
+    color: #333;
+    border: 1px solid #ddd;
+    padding: 7px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    flex: 1 1 calc(20% - 5px);
+    min-width: 65px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .mode-btn.active {
+    background: #007bff;
+    color: white;
+    border-color: #0056b3;
+  }
+
+  .mode-btn:hover:not(.active) {
+    background: #e8e8e8;
+  }
+
+  .input-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border-top: 1px solid #e0e0e0;
+    background: #fff;
+    flex-shrink: 0;
   }
 
   .input-area {
     display: flex;
-    border-top: 1px solid #ddd;
+    gap: 0;
   }
 
-  input {
+  input#messageInput {
     flex: 1;
-    padding: 10px;
+    padding: 10px 12px;
     border: none;
     outline: none;
+    font-size: 13px;
+    font-family: inherit;
+    min-height: 40px;
   }
 
-  button {
+  input#messageInput::placeholder {
+    color: #bbb;
+  }
+
+  input#messageInput.error {
+    border-bottom: 2px solid #dc3545;
+  }
+
+  button#sendButton {
     background: #007bff;
     color: white;
     border: none;
-    padding: 10px 15px;
+    padding: 10px 16px;
     cursor: pointer;
+    font-weight: 600;
+    font-size: 12px;
+    transition: background 0.2s ease;
+    white-space: nowrap;
   }
 
-  button:hover {
+  button#sendButton:hover:not(:disabled) {
     background: #0056b3;
+  }
+
+  button#sendButton:active:not(:disabled) {
+    background: #004085;
+  }
+
+  button#sendButton:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  .input-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 12px 8px 12px;
+    font-size: 11px;
+    border-top: 1px solid #f0f0f0;
+    background: #fafafa;
+  }
+
+  .char-count {
+    color: #666;
+    font-weight: 500;
+  }
+
+  .char-count.warning {
+    color: #dc3545;
+    font-weight: 600;
+  }
+
+  .char-warning {
+    color: #dc3545;
+    font-weight: 600;
+    display: none;
+  }
+
+  .char-warning.show {
+    display: block;
+  }
+
+  .edit-area {
+    display: none;
+    flex-direction: column;
+    gap: 6px;
+    padding: 0 5px;
+    margin-top: 3px;
+  }
+
+  .edit-area.active {
+    display: flex;
+  }
+
+  .edit-area textarea {
+    padding: 8px 10px;
+    border: 1px solid #007bff;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 12px;
+    resize: vertical;
+    min-height: 50px;
+    max-height: 100px;
+    outline: none;
+  }
+
+  .edit-area textarea:focus {
+    border-color: #0056b3;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+  }
+
+  .edit-buttons {
+    display: flex;
+    gap: 6px;
+  }
+
+  .edit-buttons button {
+    flex: 1;
+    padding: 7px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 11px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .edit-buttons .save {
+    background: #28a745;
+    color: white;
+  }
+
+  .edit-buttons .save:hover {
+    background: #218838;
+  }
+
+  .edit-buttons .cancel {
+    background: #6c757d;
+    color: white;
+  }
+
+  .edit-buttons .cancel:hover {
+    background: #5a6268;
+  }
+
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+  }
+
+  .modal.active {
+    display: flex;
+  }
+
+  .modal-content {
+    background: white;
+    border-radius: 10px;
+    padding: 16px;
+    width: 100%;
+    max-width: 350px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    z-index: 1001;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+
+  .modal-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #333;
+  }
+
+  .modal-text {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 14px;
+    line-height: 1.4;
+  }
+
+  .modal-textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 12px;
+    resize: vertical;
+    min-height: 80px;
+    margin-bottom: 12px;
+    outline: none;
+  }
+
+  .modal-textarea:focus {
+    border-color: #007bff;
+  }
+
+  .modal-buttons {
+    display: flex;
+    gap: 10px;
+  }
+
+  .modal-buttons button {
+    flex: 1;
+    padding: 9px 14px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 12px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .modal-buttons .cancel {
+    background: #e0e0e0;
+    color: #333;
+  }
+
+  .modal-buttons .cancel:hover {
+    background: #d0d0d0;
+  }
+
+  .modal-buttons .confirm {
+    background: #dc3545;
+    color: white;
+  }
+
+  .modal-buttons .confirm:hover {
+    background: #c82333;
+  }
+
+  .modal-buttons .primary {
+    background: #007bff;
+    color: white;
+  }
+
+  .modal-buttons .primary:hover {
+    background: #0056b3;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: white;
+    padding: 10px 16px;
+    border-radius: 5px;
+    font-size: 12px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 999;
+    white-space: nowrap;
+  }
+
+  .toast.show {
+    opacity: 1;
+  }
+
+  @media (min-width: 480px) {
+    .mode-btn {
+      flex: 1 1 calc(25% - 4px);
+      min-width: 70px;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .chat-container {
+      max-height: 700px;
+    }
+
+    .message-bubble {
+      max-width: 70%;
+    }
+
+    .action-buttons,
+    .rating-section {
+      max-width: 70%;
+    }
   }
 </style>
 </head>
@@ -89,76 +689,875 @@
 <body>
 
 <div class="chat-container">
-  <div class="header">MySideKik</div>
+  <div class="header">
+    <div class="header-left">
+      <div class="logo">M</div>
+      <div class="header-info">
+        <h1 class="app-name">MySideKik</h1>
+        <p class="app-subtitle">Think it. Rewrite it. Send it better.</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <span class="beta-badge">v0.1 Beta</span>
+      <button class="header-btn" id="feedbackBtn">Feedback</button>
+      <button class="header-btn" id="exportBtn">Export</button>
+      <button class="header-btn" id="clearBtn">Clear</button>
+    </div>
+  </div>
 
-  <div id="chat" class="chat-box"></div>
+  <div id="chat" class="chat-box">
+    <div class="empty-state">
+      <div class="empty-state-icon">💬</div>
+      <div class="empty-state-text">Start a conversation</div>
+    </div>
+  </div>
 
-  <div class="input-area">
-    <input id="messageInput" placeholder="Type a message..." />
-    <button id="sendButton">Send</button>
+  <div class="mode-buttons">
+    <button class="mode-btn active" data-mode="rewrite">Rewrite</button>
+    <button class="mode-btn" data-mode="analyze">Analyze</button>
+    <button class="mode-btn" data-mode="calm">Calm Down</button>
+    <button class="mode-btn" data-mode="legal">Legal Tone</button>
+    <button class="mode-btn" data-mode="repair">Repair</button>
+  </div>
+
+  <div class="input-wrapper">
+    <div class="input-area">
+      <input id="messageInput" placeholder="Type a message..." maxlength="1000" />
+      <button id="sendButton">Send</button>
+    </div>
+    <div class="input-footer">
+      <span class="char-warning">Message exceeds 1000 character limit</span>
+      <span class="char-count"><span id="charCount">0</span>/1000</span>
+    </div>
   </div>
 </div>
 
+<div id="clearModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-title">Clear Conversation?</div>
+    <div class="modal-text">This will delete all messages. This action cannot be undone.</div>
+    <div class="modal-buttons">
+      <button class="cancel" id="cancelClearBtn">Cancel</button>
+      <button class="confirm" id="confirmClearBtn">Clear All</button>
+    </div>
+  </div>
+</div>
+
+<div id="feedbackModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-title">Send Feedback</div>
+    <div class="modal-text">Help us improve MySideKik by sharing your thoughts.</div>
+    <textarea id="feedbackText" class="modal-textarea" placeholder="What do you think? Any bugs or suggestions?"></textarea>
+    <div class="modal-buttons">
+      <button class="cancel" id="cancelFeedbackBtn">Cancel</button>
+      <button class="primary" id="submitFeedbackBtn">Send Feedback</button>
+    </div>
+  </div>
+</div>
+
+<div id="reportModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-title">Report Bad Rewrite</div>
+    <div class="modal-text">Help us identify issues with this rewrite.</div>
+    <textarea id="reportText" class="modal-textarea" placeholder="What was wrong with this rewrite?"></textarea>
+    <div class="modal-buttons">
+      <button class="cancel" id="cancelReportBtn">Cancel</button>
+      <button class="confirm" id="submitReportBtn">Submit Report</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
 <script>
   const chat = document.getElementById("chat");
+  const messageInput = document.getElementById("messageInput");
+  const sendButton = document.getElementById("sendButton");
+  const charCount = document.getElementById("charCount");
+  const charWarning = document.querySelector(".char-warning");
+  const charCountDisplay = document.querySelector(".char-count");
+  const clearBtn = document.getElementById("clearBtn");
+  const feedbackBtn = document.getElementById("feedbackBtn");
+  const exportBtn = document.getElementById("exportBtn");
+  const clearModal = document.getElementById("clearModal");
+  const feedbackModal = document.getElementById("feedbackModal");
+  const reportModal = document.getElementById("reportModal");
+  const toast = document.getElementById("toast");
 
-  function addMessage(text, sender) {
-    const div = document.createElement("div");
-    div.classList.add("message", sender);
-    div.textContent = text;
-    chat.appendChild(div);
-    chat.scrollTop = chat.scrollHeight;
-    return div;
+  let selectedMode = "rewrite";
+  let currentReplyGroup = null;
+  let hasMessages = false;
+  let reportingMessageId = null;
+
+  const STORAGE_KEY = "mysidekik_conversation";
+  const FEEDBACK_KEY = "mysidekik_feedback";
+  const REPORTS_KEY = "mysidekik_reports";
+  const MAX_CHARS = 1000;
+
+  // Input validation
+  function updateCharCount() {
+    const length = messageInput.value.length;
+    charCount.textContent = length;
+
+    if (length > MAX_CHARS) {
+      charCountDisplay.classList.add("warning");
+      charWarning.classList.add("show");
+      messageInput.classList.add("error");
+      sendButton.disabled = true;
+    } else if (length === 0) {
+      charCountDisplay.classList.remove("warning");
+      charWarning.classList.remove("show");
+      messageInput.classList.remove("error");
+      sendButton.disabled = true;
+    } else {
+      charCountDisplay.classList.remove("warning");
+      charWarning.classList.remove("show");
+      messageInput.classList.remove("error");
+      sendButton.disabled = false;
+    }
+  }
+
+  messageInput.addEventListener("input", updateCharCount);
+  messageInput.addEventListener("paste", () => {
+    setTimeout(updateCharCount, 0);
+  });
+
+  // Storage functions
+  function saveConversation() {
+    const messages = [];
+    const groups = chat.querySelectorAll(".message-group");
+
+    groups.forEach((group) => {
+      const label = group.querySelector(".group-label");
+      const messageDiv = group.querySelector(".message");
+      const timestamp = group.querySelector(".message-timestamp");
+
+      if (label && messageDiv && timestamp) {
+        messages.push({
+          type: messageDiv.classList.contains("user") ? "user" : "bot",
+          label: label.textContent,
+          text: messageDiv.textContent,
+          timestamp: timestamp.textContent,
+          current: messageDiv.dataset.current || messageDiv.textContent,
+          original: messageDiv.dataset.original || "",
+          rating: messageDiv.dataset.rating || "",
+        });
+      }
+    });
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+  }
+
+  function loadConversation() {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (!stored) return;
+
+    try {
+      const messages = JSON.parse(stored);
+      messages.forEach((msg) => {
+        if (msg.type === "user") {
+          renderDraftMessage(msg.text, msg.timestamp);
+        } else {
+          renderBotReply(msg.text, msg.timestamp, msg.original, msg.current, msg.label, msg.rating);
+        }
+      });
+    } catch (err) {
+      console.error("Error loading conversation:", err);
+    }
+  }
+
+  function renderDraftMessage(text, timestamp) {
+    const group = document.createElement("div");
+    group.classList.add("message-group", "user-sent");
+
+    const label = document.createElement("div");
+    label.classList.add("group-label", "draft");
+    label.textContent = "Draft";
+
+    const bubble = document.createElement("div");
+    bubble.classList.add("message-bubble");
+
+    const message = document.createElement("div");
+    message.classList.add("message", "user");
+    message.textContent = text;
+
+    const ts = document.createElement("div");
+    ts.classList.add("message-timestamp");
+    ts.textContent = timestamp;
+
+    bubble.appendChild(message);
+    bubble.appendChild(ts);
+
+    group.appendChild(label);
+    group.appendChild(bubble);
+
+    chat.appendChild(group);
+    updateEmptyState();
+  }
+
+  function renderBotReply(text, timestamp, original, current, label, rating = "") {
+    const group = document.createElement("div");
+    group.classList.add("message-group", "bot-reply");
+
+    const labelDiv = document.createElement("div");
+    labelDiv.classList.add("group-label");
+
+    if (label.includes("Final Sent")) {
+      labelDiv.classList.add("sent");
+    } else if (label.includes("AI Rewrite")) {
+      labelDiv.classList.add("rewrite");
+    }
+    labelDiv.textContent = label;
+
+    const bubble = document.createElement("div");
+    bubble.classList.add("message-bubble");
+
+    const messageDiv = document.createElement("div");
+    messageDiv.classList.add("message", "bot", "final-message");
+    messageDiv.textContent = text;
+    messageDiv.dataset.original = original;
+    messageDiv.dataset.current = current;
+    messageDiv.dataset.rating = rating;
+    messageDiv.id = "msg_" + Date.now() + "_" + Math.random();
+
+    const ts = document.createElement("div");
+    ts.classList.add("message-timestamp");
+    ts.textContent = timestamp;
+
+    bubble.appendChild(messageDiv);
+    bubble.appendChild(ts);
+
+    const actionDiv = document.createElement("div");
+    actionDiv.classList.add("action-buttons");
+
+    if (!label.includes("Final Sent")) {
+      const sendFinalBtn = document.createElement("button");
+      sendFinalBtn.classList.add("action-btn");
+      sendFinalBtn.textContent = "Send Final";
+      sendFinalBtn.addEventListener("click", () => sendFinal(messageDiv, group, labelDiv));
+
+      const retryBtn = document.createElement("button");
+      retryBtn.classList.add("action-btn");
+      retryBtn.textContent = "Retry";
+      retryBtn.addEventListener("click", () => retryRewrite(messageDiv, original, group));
+
+      const copyBtn = document.createElement("button");
+      copyBtn.classList.add("action-btn");
+      copyBtn.textContent = "Copy";
+      copyBtn.addEventListener("click", () => copyText(messageDiv));
+
+      const editBtn = document.createElement("button");
+      editBtn.classList.add("action-btn");
+      editBtn.textContent = "Edit";
+      editBtn.addEventListener("click", () => toggleEditMode(actionDiv, editArea));
+
+      actionDiv.appendChild(sendFinalBtn);
+      actionDiv.appendChild(retryBtn);
+      actionDiv.appendChild(copyBtn);
+      actionDiv.appendChild(editBtn);
+    }
+
+    const ratingSection = document.createElement("div");
+    ratingSection.classList.add("rating-section");
+
+    const ratingText = document.createElement("div");
+    ratingText.classList.add("rating-text");
+    ratingText.textContent = "Was this helpful?";
+
+    const ratingButtons = document.createElement("div");
+    ratingButtons.classList.add("rating-buttons");
+
+    const yesBtn = document.createElement("button");
+    yesBtn.classList.add("rating-btn");
+    yesBtn.textContent = "👍 Yes";
+    if (rating === "yes") yesBtn.classList.add("rated");
+    yesBtn.addEventListener("click", () => rateRewrite(messageDiv, "yes", yesBtn, noBtn, ratingButtons));
+
+    const noBtn = document.createElement("button");
+    noBtn.classList.add("rating-btn");
+    noBtn.textContent = "👎 No";
+    if (rating === "no") noBtn.classList.add("rated");
+    noBtn.addEventListener("click", () => rateRewrite(messageDiv, "no", yesBtn, noBtn, ratingButtons));
+
+    ratingButtons.appendChild(yesBtn);
+    ratingButtons.appendChild(noBtn);
+
+    ratingSection.appendChild(ratingText);
+    ratingSection.appendChild(ratingButtons);
+
+    const reportBtn = document.createElement("button");
+    reportBtn.classList.add("action-btn", "warning");
+    reportBtn.textContent = "Report bad rewrite";
+    reportBtn.addEventListener("click", () => openReportModal(messageDiv, reportingMessageId));
+
+    const editArea = document.createElement("div");
+    editArea.classList.add("edit-area");
+
+    const textarea = document.createElement("textarea");
+    textarea.value = current;
+
+    const editButtons = document.createElement("div");
+    editButtons.classList.add("edit-buttons");
+
+    const saveBtn = document.createElement("button");
+    saveBtn.classList.add("save");
+    saveBtn.textContent = "Save";
+    saveBtn.addEventListener("click", () => saveEdit(messageDiv, textarea, actionDiv, editArea, ts));
+
+    const cancelBtn = document.createElement("button");
+    cancelBtn.classList.add("cancel");
+    cancelBtn.textContent = "Cancel";
+    cancelBtn.addEventListener("click", () => toggleEditMode(actionDiv, editArea));
+
+    editButtons.appendChild(saveBtn);
+    editButtons.appendChild(cancelBtn);
+
+    editArea.appendChild(textarea);
+    editArea.appendChild(editButtons);
+
+    group.appendChild(labelDiv);
+    group.appendChild(bubble);
+    group.appendChild(ratingSection);
+    if (!label.includes("Final Sent")) {
+      group.appendChild(actionDiv);
+      group.appendChild(reportBtn);
+    }
+    group.appendChild(editArea);
+
+    chat.appendChild(group);
+    updateEmptyState();
+  }
+
+  function updateEmptyState() {
+    const groups = chat.querySelectorAll(".message-group");
+    hasMessages = groups.length > 0;
+
+    const emptyState = chat.querySelector(".empty-state");
+    if (hasMessages && emptyState) {
+      chat.removeChild(emptyState);
+    } else if (!hasMessages && !emptyState) {
+      const empty = document.createElement("div");
+      empty.classList.add("empty-state");
+      empty.innerHTML = `
+        <div class="empty-state-icon">💬</div>
+        <div class="empty-state-text">Start a conversation</div>
+      `;
+      chat.appendChild(empty);
+    }
+  }
+
+  function getTimestamp() {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    return `${hours}:${minutes}`;
   }
 
   function filterMessage(input) {
     const lower = input.toLowerCase();
 
-  if (lower.includes("hey babe")) {
-    return "babe are you not busy right now?";
+    if (lower.includes("hey babe")) {
+      return "babe are you not busy right now?";
+    }
+
+    if (lower.includes("wanna eat")) {
+      return "are you hungry? want to go grab something to eat?";
+    }
+
+    return input;
   }
 
-  if (lower.includes("wanna eat")) {
-    return "are you hungry? want to go grab something to eat?";
+  function addDraftMessage(text) {
+    const group = document.createElement("div");
+    group.classList.add("message-group", "user-sent");
+
+    const label = document.createElement("div");
+    label.classList.add("group-label", "draft");
+    label.textContent = "Draft";
+
+    const bubble = document.createElement("div");
+    bubble.classList.add("message-bubble");
+
+    const message = document.createElement("div");
+    message.classList.add("message", "user");
+    message.textContent = text;
+
+    const timestamp = document.createElement("div");
+    timestamp.classList.add("message-timestamp");
+    timestamp.textContent = getTimestamp();
+
+    bubble.appendChild(message);
+    bubble.appendChild(timestamp);
+
+    group.appendChild(label);
+    group.appendChild(bubble);
+
+    const emptyState = chat.querySelector(".empty-state");
+    if (emptyState) {
+      chat.removeChild(emptyState);
+    }
+
+    chat.appendChild(group);
+    updateEmptyState();
+    scrollToBottom();
+    return group;
   }
 
-  return input; // fallback
-}
+  function createReplyGroup(replyText, originalMessage) {
+    const group = document.createElement("div");
+    group.classList.add("message-group", "bot-reply");
 
-  async function sendMessage() {
-    const input = document.getElementById("messageInput");
-    const rawText = input.value;
-  const text = filterMessage(rawText);
+    const label = document.createElement("div");
+    label.classList.add("group-label", "rewrite");
+    label.textContent = "AI Rewrite";
 
-    if (!text) return;
+    const bubble = document.createElement("div");
+    bubble.classList.add("message-bubble");
 
-    addMessage(text, "user");
-    input.value = "";
+    const messageDiv = document.createElement("div");
+    messageDiv.classList.add("message", "bot", "final-message");
+    messageDiv.textContent = replyText;
+    messageDiv.dataset.original = originalMessage;
+    messageDiv.dataset.current = replyText;
+    messageDiv.dataset.rating = "";
+    messageDiv.id = "msg_" + Date.now() + "_" + Math.random();
 
-    const loadingMsg = addMessage("Typing...", "bot");
+    const timestamp = document.createElement("div");
+    timestamp.classList.add("message-timestamp");
+    timestamp.textContent = getTimestamp();
+
+    bubble.appendChild(messageDiv);
+    bubble.appendChild(timestamp);
+
+    const ratingSection = document.createElement("div");
+    ratingSection.classList.add("rating-section");
+
+    const ratingText = document.createElement("div");
+    ratingText.classList.add("rating-text");
+    ratingText.textContent = "Was this helpful?";
+
+    const ratingButtons = document.createElement("div");
+    ratingButtons.classList.add("rating-buttons");
+
+    const yesBtn = document.createElement("button");
+    yesBtn.classList.add("rating-btn");
+    yesBtn.textContent = "👍 Yes";
+    yesBtn.addEventListener("click", () => rateRewrite(messageDiv, "yes", yesBtn, noBtn, ratingButtons));
+
+    const noBtn = document.createElement("button");
+    noBtn.classList.add("rating-btn");
+    noBtn.textContent = "👎 No";
+    noBtn.addEventListener("click", () => rateRewrite(messageDiv, "no", yesBtn, noBtn, ratingButtons));
+
+    ratingButtons.appendChild(yesBtn);
+    ratingButtons.appendChild(noBtn);
+
+    ratingSection.appendChild(ratingText);
+    ratingSection.appendChild(ratingButtons);
+
+    const actionDiv = document.createElement("div");
+    actionDiv.classList.add("action-buttons");
+
+    const sendFinalBtn = document.createElement("button");
+    sendFinalBtn.classList.add("action-btn");
+    sendFinalBtn.textContent = "Send Final";
+    sendFinalBtn.addEventListener("click", () => sendFinal(messageDiv, group, label));
+
+    const retryBtn = document.createElement("button");
+    retryBtn.classList.add("action-btn");
+    retryBtn.textContent = "Retry";
+    retryBtn.addEventListener("click", () => retryRewrite(messageDiv, originalMessage, group));
+
+    const copyBtn = document.createElement("button");
+    copyBtn.classList.add("action-btn");
+    copyBtn.textContent = "Copy";
+    copyBtn.addEventListener("click", () => copyText(messageDiv));
+
+    const editBtn = document.createElement("button");
+    editBtn.classList.add("action-btn");
+    editBtn.textContent = "Edit";
+    editBtn.addEventListener("click", () => toggleEditMode(actionDiv, editArea));
+
+    actionDiv.appendChild(sendFinalBtn);
+    actionDiv.appendChild(retryBtn);
+    actionDiv.appendChild(copyBtn);
+    actionDiv.appendChild(editBtn);
+
+    const reportBtn = document.createElement("button");
+    reportBtn.classList.add("action-btn", "warning");
+    reportBtn.textContent = "Report bad rewrite";
+    reportBtn.addEventListener("click", () => openReportModal(messageDiv));
+
+    const editArea = document.createElement("div");
+    editArea.classList.add("edit-area");
+
+    const textarea = document.createElement("textarea");
+    textarea.value = replyText;
+
+    const editButtons = document.createElement("div");
+    editButtons.classList.add("edit-buttons");
+
+    const saveBtn = document.createElement("button");
+    saveBtn.classList.add("save");
+    saveBtn.textContent = "Save";
+    saveBtn.addEventListener("click", () => saveEdit(messageDiv, textarea, actionDiv, editArea, timestamp));
+
+    const cancelBtn = document.createElement("button");
+    cancelBtn.classList.add("cancel");
+    cancelBtn.textContent = "Cancel";
+    cancelBtn.addEventListener("click", () => toggleEditMode(actionDiv, editArea));
+
+    editButtons.appendChild(saveBtn);
+    editButtons.appendChild(cancelBtn);
+
+    editArea.appendChild(textarea);
+    editArea.appendChild(editButtons);
+
+    group.appendChild(label);
+    group.appendChild(bubble);
+    group.appendChild(ratingSection);
+    group.appendChild(actionDiv);
+    group.appendChild(reportBtn);
+    group.appendChild(editArea);
+
+    chat.appendChild(group);
+    updateEmptyState();
+    scrollToBottom();
+    currentReplyGroup = group;
+    return group;
+  }
+
+  function scrollToBottom() {
+    setTimeout(() => {
+      chat.scrollTop = chat.scrollHeight;
+    }, 0);
+  }
+
+  function rateRewrite(messageDiv, rating, yesBtn, noBtn, ratingButtons) {
+    messageDiv.dataset.rating = rating;
+
+    yesBtn.classList.remove("rated");
+    noBtn.classList.remove("rated");
+
+    if (rating === "yes") {
+      yesBtn.classList.add("rated");
+    } else {
+      noBtn.classList.add("rated");
+    }
+
+    saveConversation();
+    showToast(rating === "yes" ? "Thanks for the feedback!" : "We'll improve this.");
+  }
+
+  function openReportModal(messageDiv) {
+    reportingMessageId = messageDiv.id;
+    document.getElementById("reportText").value = "";
+    reportModal.classList.add("active");
+  }
+
+  function sendFinal(messageDiv, group, label) {
+    const finalText = messageDiv.dataset.current;
+
+    label.classList.remove("rewrite");
+    label.classList.add("sent");
+    label.textContent = "Final Sent";
+
+    const sentGroup = document.createElement("div");
+    sentGroup.classList.add("message-group", "user-sent");
+
+    const sentBubble = document.createElement("div");
+    sentBubble.classList.add("message-bubble");
+
+    const sentMessage = document.createElement("div");
+    sentMessage.classList.add("message", "user");
+    sentMessage.textContent = finalText;
+
+    const sentTimestamp = document.createElement("div");
+    sentTimestamp.classList.add("message-timestamp");
+    sentTimestamp.textContent = getTimestamp();
+
+    sentBubble.appendChild(sentMessage);
+    sentBubble.appendChild(sentTimestamp);
+
+    sentGroup.appendChild(sentBubble);
+    chat.appendChild(sentGroup);
+
+    const actionDiv = group.querySelector(".action-buttons");
+    const reportBtn = group.querySelector(".action-btn.warning");
+    const ratingSection = group.querySelector(".rating-section");
+
+    if (actionDiv) actionDiv.style.display = "none";
+    if (reportBtn) reportBtn.style.display = "none";
+    if (ratingSection) ratingSection.style.display = "none";
+
+    showToast("Message sent!");
+    scrollToBottom();
+    saveConversation();
+  }
+
+  function copyText(messageDiv) {
+    const text = messageDiv.dataset.current;
+    navigator.clipboard.writeText(text).then(() => {
+      showToast("Copied!");
+    });
+  }
+
+  function toggleEditMode(actionDiv, editArea) {
+    const isActive = editArea.classList.toggle("active");
+    actionDiv.style.display = isActive ? "none" : "flex";
+  }
+
+  function saveEdit(messageDiv, textarea, actionDiv, editArea, timestamp) {
+    const newText = textarea.value.trim();
+    if (newText) {
+      messageDiv.textContent = newText;
+      messageDiv.dataset.current = newText;
+      editArea.classList.remove("active");
+      actionDiv.style.display = "flex";
+      timestamp.textContent = "edited";
+      showToast("Message updated!");
+      saveConversation();
+    }
+  }
+
+  async function retryRewrite(messageDiv, originalMessage, group) {
+    const origData = messageDiv.dataset.original || originalMessage;
+    const originalText = messageDiv.textContent;
+    messageDiv.textContent = "Rewriting...";
 
     try {
       const res = await fetch("/chat", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ message: text })
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: origData, mode: selectedMode }),
       });
 
       const data = await res.json();
-
-      loadingMsg.textContent = data.reply;
-
+      messageDiv.textContent = data.reply;
+      messageDiv.dataset.current = data.reply;
+      messageDiv.dataset.rating = "";
+      saveConversation();
     } catch (err) {
-      loadingMsg.textContent = "Error...";
+      messageDiv.textContent = originalText;
     }
   }
 
-  document.getElementById("sendButton").addEventListener("click", sendMessage);
+  async function sendMessage() {
+    const rawText = messageInput.value.trim();
 
-  document.getElementById("messageInput").addEventListener("keypress", function(e) {
-    if (e.key === "Enter") sendMessage();
+    if (rawText.length === 0) {
+      showToast("Message cannot be empty");
+      return;
+    }
+
+    if (rawText.length > MAX_CHARS) {
+      showToast("Message exceeds 1000 character limit");
+      return;
+    }
+
+    const text = filterMessage(rawText);
+
+    addDraftMessage(text);
+    messageInput.value = "";
+    updateCharCount();
+
+    const loadingGroup = document.createElement("div");
+    loadingGroup.classList.add("message-group", "bot-reply");
+
+    const label = document.createElement("div");
+    label.classList.add("group-label", "rewrite");
+    label.textContent = "AI Rewrite";
+
+    const bubble = document.createElement("div");
+    bubble.classList.add("message-bubble");
+
+    const loadingMsg = document.createElement("div");
+    loadingMsg.classList.add("message", "bot");
+    loadingMsg.textContent = "Typing...";
+
+    const timestamp = document.createElement("div");
+    timestamp.classList.add("message-timestamp");
+    timestamp.textContent = getTimestamp();
+
+    bubble.appendChild(loadingMsg);
+    bubble.appendChild(timestamp);
+
+    loadingGroup.appendChild(label);
+    loadingGroup.appendChild(bubble);
+
+    chat.appendChild(loadingGroup);
+    scrollToBottom();
+
+    try {
+      const res = await fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text, mode: selectedMode }),
+      });
+
+      const data = await res.json();
+      chat.removeChild(loadingGroup);
+      createReplyGroup(data.reply, text);
+      saveConversation();
+    } catch (err) {
+      loadingMsg.textContent = "Error processing message. Try again.";
+    }
+  }
+
+  function clearConversation() {
+    chat.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">💬</div>
+        <div class="empty-state-text">Start a conversation</div>
+      </div>
+    `;
+    localStorage.removeItem(STORAGE_KEY);
+    hasMessages = false;
+    showToast("Conversation cleared");
+  }
+
+  function exportLog() {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    const feedback = localStorage.getItem(FEEDBACK_KEY);
+    const reports = localStorage.getItem(REPORTS_KEY);
+
+    const exportData = {
+      timestamp: new Date().toISOString(),
+      version: "0.1-beta",
+      conversation: stored ? JSON.parse(stored) : [],
+      feedback: feedback ? JSON.parse(feedback) : [],
+      reports: reports ? JSON.parse(reports) : [],
+    };
+
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `mysidekik_log_${Date.now()}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+
+    showToast("Log exported!");
+  }
+
+  function submitFeedback(text) {
+    const feedback = localStorage.getItem(FEEDBACK_KEY);
+    const feedbackList = feedback ? JSON.parse(feedback) : [];
+
+    feedbackList.push({
+      timestamp: new Date().toISOString(),
+      text: text,
+    });
+
+    localStorage.setItem(FEEDBACK_KEY, JSON.stringify(feedbackList));
+    showToast("Feedback sent. Thank you!");
+  }
+
+  function submitReport(text) {
+    const reports = localStorage.getItem(REPORTS_KEY);
+    const reportsList = reports ? JSON.parse(reports) : [];
+
+    reportsList.push({
+      timestamp: new Date().toISOString(),
+      messageId: reportingMessageId,
+      text: text,
+    });
+
+    localStorage.setItem(REPORTS_KEY, JSON.stringify(reportsList));
+    showToast("Report submitted. We'll review it.");
+  }
+
+  function showToast(message) {
+    toast.textContent = message;
+    toast.classList.add("show");
+    setTimeout(() => {
+      toast.classList.remove("show");
+    }, 2000);
+  }
+
+  // Event listeners
+  clearBtn.addEventListener("click", () => {
+    clearModal.classList.add("active");
+  });
+
+  feedbackBtn.addEventListener("click", () => {
+    feedbackModal.classList.add("active");
+  });
+
+  exportBtn.addEventListener("click", exportLog);
+
+  document.getElementById("cancelClearBtn").addEventListener("click", () => {
+    clearModal.classList.remove("active");
+  });
+
+  document.getElementById("confirmClearBtn").addEventListener("click", () => {
+    clearModal.classList.remove("active");
+    clearConversation();
+  });
+
+  document.getElementById("cancelFeedbackBtn").addEventListener("click", () => {
+    feedbackModal.classList.remove("active");
+  });
+
+  document.getElementById("submitFeedbackBtn").addEventListener("click", () => {
+    const text = document.getElementById("feedbackText").value.trim();
+    if (text) {
+      submitFeedback(text);
+      feedbackModal.classList.remove("active");
+    } else {
+      showToast("Please enter feedback");
+    }
+  });
+
+  document.getElementById("cancelReportBtn").addEventListener("click", () => {
+    reportModal.classList.remove("active");
+  });
+
+  document.getElementById("submitReportBtn").addEventListener("click", () => {
+    const text = document.getElementById("reportText").value.trim();
+    if (text) {
+      submitReport(text);
+      reportModal.classList.remove("active");
+    } else {
+      showToast("Please describe the issue");
+    }
+  });
+
+  clearModal.addEventListener("click", (e) => {
+    if (e.target === clearModal) clearModal.classList.remove("active");
+  });
+
+  feedbackModal.addEventListener("click", (e) => {
+    if (e.target === feedbackModal) feedbackModal.classList.remove("active");
+  });
+
+  reportModal.addEventListener("click", (e) => {
+    if (e.target === reportModal) reportModal.classList.remove("active");
+  });
+
+  document.querySelectorAll(".mode-btn").forEach((btn) => {
+    btn.addEventListener("click", function () {
+      document.querySelectorAll(".mode-btn").forEach((b) => b.classList.remove("active"));
+      this.classList.add("active");
+      selectedMode = this.dataset.mode;
+    });
+  });
+
+  sendButton.addEventListener("click", sendMessage);
+
+  messageInput.addEventListener("keypress", function (e) {
+    if (e.key === "Enter" && !sendButton.disabled) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+
+  // Load conversation on page load
+  window.addEventListener("load", () => {
+    loadConversation();
+    scrollToBottom();
+    updateCharCount();
   });
 </script>
 
