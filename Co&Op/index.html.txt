@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>MySideKik</title>
+  <style>
+    body {
+      margin: 0;
+      background: #f2f2f2;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .phone {
+      width: 360px;
+      height: 640px;
+      background: white;
+      border-radius: 25px;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      background: #0b74ff;
+      color: white;
+      padding: 18px;
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .chat {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      background: #f7f7f7;
+    }
+
+    .message {
+      max-width: 75%;
+      padding: 10px 14px;
+      margin: 8px 0;
+      border-radius: 18px;
+      font-size: 15px;
+      line-height: 1.4;
+      clear: both;
+    }
+
+    .user {
+      background: #0b74ff;
+      color: white;
+      float: right;
+      border-bottom-right-radius: 5px;
+    }
+
+    .bot {
+      background: #e5e5ea;
+      color: black;
+      float: left;
+      border-bottom-left-radius: 5px;
+    }
+
+    .input-area {
+      display: flex;
+      border-top: 1px solid #ddd;
+      background: white;
+      padding: 10px;
+    }
+
+    input {
+      flex: 1;
+      border: 1px solid #ccc;
+      border-radius: 20px;
+      padding: 10px 14px;
+      font-size: 14px;
+      outline: none;
+    }
+
+    button {
+      margin-left: 8px;
+      border: none;
+      background: #0b74ff;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 20px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #005fd1;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="phone">
+    <div class="header">MySideKik</div>
+
+    <div class="chat" id="chat">
+      <div class="message user">you stupid piece of shit i hate you</div>
+      <div class="message bot">I’m really upset with you right now.</div>
+
+      <div class="message user">where do you wanna go eat pick a place i like</div>
+      <div class="message bot">Where do you want to go eat? Pick a place you like.</div>
+    </div>
+
+    <div class="input-area">
+      <input id="messageInput" type="text" placeholder="Type a message..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <script>
+    function sendMessage() {
+      const input = document.getElementById("messageInput");
+      const chat = document.getElementById("chat");
+      const text = input.value.trim();
+
+      if (text === "") return;
+
+      const userMsg = document.createElement("div");
+      userMsg.className = "message user";
+      userMsg.textContent = text;
+      chat.appendChild(userMsg);
+
+      const botMsg = document.createElement("div");
+      botMsg.className = "message bot";
+      botMsg.textContent = makeCalm(text);
+      chat.appendChild(botMsg);
+
+      input.value = "";
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function makeCalm(text) {
+      const lower = text.toLowerCase();
+
+      if (lower.includes("hate you")) {
+        return "I’m really upset with you right now.";
+      }
+
+      if (lower.includes("where") && lower.includes("eat")) {
+        return "Where do you want to go eat?";
+      }
+
+      if (lower.includes("wtf")) {
+        return "I’m confused and frustrated about this.";
+      }
+
+      return "Let me say this in a calmer way: " + text;
+    }
+  </script>
+</body>
+</html>
+      wrapper.appendChild(copyBtn);
+    }
+
+    chat.appendChild(wrapper);
+    chat.scrollTop = chat.scrollHeight;
+
+    return div;
+  }
+
+  async function sendMessage() {
+    const input = document.getElementById("messageInput");
+    const text = input.value.trim();
+
+    if (!text) return;
+
+    addMessage(text, "user", "Original Message");
+    input.value = "";
+
+    const loadingMsg = addMessage("Typing...", "bot", "MySideKik Rewrite");
+
+    try {
+      const res = await fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text })
+      });
+
+      const data = await res.json();
+      loadingMsg.textContent = data.reply || "No response.";
+    } catch (err) {
+      loadingMsg.textContent = "Error...";
+    }
+  }
+
+  document.getElementById("sendButton").addEventListener("click", sendMessage);
+
+  document.getElementById("messageInput").addEventListener("keypress", function(e) {
+    if (e.key === "Enter") sendMessage();
+  });
+</script>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MySideKik</title>
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f0f2f5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+
+  .chat-container {
+    width: 350px;
+    background: white;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    height: 500px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  }
+
+  .header {
+    background: #007bff;
+    color: white;
+    padding: 15px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    font-weight: bold;
+  }
+
+  .chat-box {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .message {
+    max-width: 70%;
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 15px;
+  }
+
+  .user {
+    align-self: flex-end;
+    background: #007bff;
+    color: white;
+  }
+
+  .bot {
+    align-self: flex-start;
+    background: #e4e6eb;
+  }
+
+  .input-area {
+    display: flex;
+    border-top: 1px solid #ddd;
+  }
+
+  input {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    outline: none;
+  }
+
+  button {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background: #0056b3;
+  }
+</style>
+</head>
+
+<body>
+
+<div class="chat-container">
+  <div class="header">MySideKik</div>
+
+  <div id="chat" class="chat-box"></div>
+
+  <div class="input-area">
+    <input id="messageInput" placeholder="Type a message..." />
+    <button id="sendButton">Send</button>
+  </div>
+</div>
+
+<script>
+  const chat = document.getElementById("chat");
+
+  function addMessage(text, sender) {
+    const div = document.createElement("div");
+    div.classList.add("message", sender);
+    div.textContent = text;
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+    return div;
+  }
+
+  function filterMessage(input) {
+    const lower = input.toLowerCase();
+
+  if (lower.includes("hey babe")) {
+    return "babe are you not busy right now?";
+  }
+
+  if (lower.includes("wanna eat")) {
+    return "are you hungry? want to go grab something to eat?";
+  }
+
+  return input; // fallback
+}
+
+  async function sendMessage() {
+    const input = document.getElementById("messageInput");
+    const rawText = input.value;
+  const text = filterMessage(rawText);
+
+    if (!text) return;
+
+    addMessage(text, "user");
+    input.value = "";
+
+    const loadingMsg = addMessage("Typing...", "bot");
+
+    try {
+      const res = await fetch("/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ message: text })
+      });
+
+      const data = await res.json();
+
+      loadingMsg.textContent = data.reply;
+
+    } catch (err) {
+      loadingMsg.textContent = "Error...";
+    }
+  }
+
+  document.getElementById("sendButton").addEventListener("click", sendMessage);
+
+  document.getElementById("messageInput").addEventListener("keypress", function(e) {
+    if (e.key === "Enter") sendMessage();
+  });
+</script>
+
+</body>
+</html>
