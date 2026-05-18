@@ -1357,6 +1357,11 @@
 
     const text = filterMessage(rawText);
 
+        // Disable buttons while processing
+    sendButton.disabled = true;
+    const modeButtons = document.querySelectorAll(".mode-btn");
+    modeButtons.forEach((btn) => (btn.disabled = true));
+
     addDraftMessage(text);
     messageInput.value = "";
     updateCharCount();
@@ -1373,7 +1378,7 @@
 
     const loadingMsg = document.createElement("div");
     loadingMsg.classList.add("message", "bot");
-    loadingMsg.textContent = "Typing...";
+    loadingMsg.textContent = "Rewriting...";
 
     const timestamp = document.createElement("div");
     timestamp.classList.add("message-timestamp");
@@ -1396,11 +1401,24 @@
       });
 
       const data = await res.json();
+
+      // Check for error in response
+      if (data.error) {
+        loadingMsg.textContent = "Something went wrong. Try again.";
+        return;
+      }
+
       chat.removeChild(loadingGroup);
       createReplyGroup(data.reply, text);
       saveConversation();
     } catch (err) {
-      loadingMsg.textContent = "Error processing message. Try again.";
+      // Network or parsing error
+      loadingMsg.textContent = "Something went wrong. Try again.";
+    } finally {
+      // Re-enable buttons
+      sendButton.disabled = false;
+      modeButtons.forEach((btn) => (btn.disabled = false));
+      updateCharCount();
     }
   }
 
