@@ -1,6 +1,6 @@
 {
   "cli": {
-    "version": ">= 0.47.0"
+    "version": ">= 18.13.1"
   },
   "build": {
     "preview": {
@@ -8,19 +8,9 @@
         "buildType": "apk"
       }
     },
-    "preview2": {
-      "android": {
-        "buildType": "apk"
-      }
-    },
-    "preview3": {
-      "android": {
-        "buildType": "apk"
-      }
-    },
     "production": {
       "android": {
-        "buildType": "aab"
+        "buildType": "app-bundle"
       }
     }
   },

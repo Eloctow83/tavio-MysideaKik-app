@@ -36,8 +36,9 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "mysidekik-dev"
+        "projectId": "dc56e222-d304-4da4-abdf-fd12e911d328"
       }
-    }
+    },
+    "owner": "octow83"
   }
 }
