@@ -110,6 +110,75 @@ const modeInstructions = {
   repair: "Rewrite this message to repair or improve the relationship. Focus on understanding, empathy, and connection. Acknowledge the other person's perspective. Make it warm but honest. Return only the rewritten message.",
 };
 
+app.post("/api/chat", checkRateLimit, async (req, res) => {
+  try {
+    const { message, mode } = req.body;
+
+    // Validate input
+    const validation = validateInput(message);
+    if (!validation.valid) {
+      return res.status(400).json({ error: validation.error });
+    }
+
+    // Validate and sanitize mode
+    const sanitizedMode = validateMode(mode);
+    const systemInstruction = modeInstructions[sanitizedMode];
+
+    const messages = [
+      {
+        role: "system",
+        content: systemInstruction,
+      },
+      {
+        role: "user",
+        content: validation.message,
+      },
+    ];
+
+    // Make API request with timeout
+    const response = await Promise.race([
+      openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        temperature: 0.4,
+        messages: messages,
+        max_tokens: 500,
+      }),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Request timeout")), 30000)
+      ),
+    ]);
+
+    const reply =
+      response.choices[0]?.message?.content ||
+      "Sorry, I couldn't process that. Try again.";
+
+    // Limit reply length in response
+    res.json({
+      reply: reply.substring(0, 2000),
+    });
+  } catch (err) {
+    // Log error securely (don't expose to frontend)
+    console.error("Chat error:", err.message);
+
+    // Return safe error message
+    if (err.message === "Request timeout") {
+      return res.status(504).json({ error: "Request timed out. Please try again." });
+    }
+
+    if (err.status === 429) {
+      return res.status(429).json({ error: "API rate limit reached. Please try again later." });
+    }
+
+    if (err.status === 401) {
+      console.error("Authentication failed - check your OpenAI API key");
+      return res.status(500).json({ error: "Service error. Please try again." });
+    }
+
+    // Generic error for unknown issues
+    res.status(500).json({ error: "Something went wrong. Please try again." });
+  }
+});
+
 app.post("/chat", checkRateLimit, async (req, res) => {
   try {
     const { message, mode } = req.body;
