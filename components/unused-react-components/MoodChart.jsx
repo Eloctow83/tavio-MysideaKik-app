@@ -68,4 +68,26 @@ export default function MoodChart({ checkIns }) {
                 tickLine={false}
                 width={50}
               />
- 
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "hsl(220, 13%, 15%)",
+                  border: "1px solid hsl(220, 10%, 30%)",
+                  borderRadius: "6px",
+                }}
+                labelFormatter={(label) => label}
+                formatter={(value) => [moodLabels[value] || "", "Mood"]}
+              />
+              <Area
+                type="monotone"
+                dataKey="mood"
+                stroke="hsl(35, 95%, 55%)"
+                strokeWidth={2}
+                fill="url(#moodGradient)"
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
