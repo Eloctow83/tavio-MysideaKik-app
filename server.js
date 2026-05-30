@@ -59,7 +59,7 @@ function checkRateLimit(req, res, next) {
 // Middleware
 app.use(cors());
 app.use(express.json({ limit: "1mb" }));
-app.use(express.static(__dirname));
+app.use(express.static(path.join(__dirname, "public")));
 
 if (!process.env.OPENAI_API_KEY) {
   console.error("Missing OPENAI_API_KEY in .env");
